@@ -235,13 +235,16 @@ class Robotiq2fAdapterNode(Node):
         :return: The provided effort value normalized to the range of 0-255.
         :rtype: int
         """
-        if newton_effort < self.__newton_value_from_normalized_effort(0) \
-                or newton_effort > self.__newton_value_from_normalized_effort(255):
-            raise ValueError(
-                "Provided effort in newton exceeds limits of the gripper."
-                "Validate that the provided force in within the specs of the gripper!"
-                )
 
+        # if newton_effort < self.__newton_value_from_normalized_effort(0) \
+        #         or newton_effort > self.__newton_value_from_normalized_effort(255):
+        #     raise ValueError(
+        #         "Provided effort in newton exceeds limits of the gripper."
+        #         "Validate that the provided force in within the specs of the gripper!"
+        #         )
+
+        newton_effort = max(min(newton_effort, self.__newton_value_from_normalized_effort(255)), 
+                            self.__newton_value_from_normalized_effort(0))
         return int(
             (newton_effort - self._normalized_effort_baseline) / self._normalized_effort_factor
             )
@@ -328,15 +331,18 @@ class Robotiq2fAdapterNode(Node):
         :return: The normalized grip width value [0-255] calculated from the m input parameter.
         :rtype: int
         """
-        if m < self.__m_value_from_normalized_grip_width(255) \
-                or m > self.__m_value_from_normalized_grip_width(0):
-            raise ValueError(
-                f"Provided grip width {m} in m exceeds limits ["
-                f"{self.__m_value_from_normalized_grip_width(255)}, "
-                f"{self.__m_value_from_normalized_grip_width(0)}] "
-                f"of the gripper. Validate that the provided grip width is"
-                f"within the specs of the gripper!"
-                )
+        # if m < self.__m_value_from_normalized_grip_width(255) \
+        #         or m > self.__m_value_from_normalized_grip_width(0):
+        #     raise ValueError(
+        #         f"Provided grip width {m} in m exceeds limits ["
+        #         f"{self.__m_value_from_normalized_grip_width(255)}, "
+        #         f"{self.__m_value_from_normalized_grip_width(0)}] "
+        #         f"of the gripper. Validate that the provided grip width is"
+        #         f"within the specs of the gripper!"
+        #         )
+        
+        m = max(min(m, self.__m_value_from_normalized_grip_width(0)), 
+                self.__m_value_from_normalized_grip_width(255))
 
         return int(
             (self._normalized_grip_width_baseline - m) / self._normalized_grip_width_factor
@@ -458,7 +464,7 @@ class Robotiq2fAdapterNode(Node):
                 ObjectStatus.STOPPED_INNER_OBJECT,
                 ObjectStatus.STOPPED_OUTER_OBJECT
         }:
-            goal_handle.abort()
+            goal_handle.succeed()
 
             return GripperCommandAction.Result(
                 position=self.__m_value_from_normalized_grip_width(self.gripper_adapter.position),

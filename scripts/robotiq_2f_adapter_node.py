@@ -49,7 +49,8 @@ class Robotiq2fAdapterNode(Node):
         self._action_server = ActionServer(
             self,
             GripperCommandAction,
-            "~/gripper_command",
+            '/gripper_action_controller/gripper_cmd',
+            # "~/gripper_command",
             self.execute_callback
         )
 
